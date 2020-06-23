@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for ad in object_list %}
+<div class="ad-entry">
+    <h2><a href="">{{ ad.id }}</a></h2>
+    <p>{{ ad.is_active }}</p>
+    <p>{{ ad.start_date }}</p>
+    <p>{{ ad.advertiser }}</p>
+</div>
+{% endfor %}
+{% endblock content %}
