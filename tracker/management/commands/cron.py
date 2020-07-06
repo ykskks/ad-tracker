@@ -5,6 +5,59 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 # import chromedriver_binary
+from django.core.management.base import BaseCommand
+
+from ...models import Ad, Advertiser
+ 
+class Command(BaseCommand):
+    """
+    現在登録さてれるAdvertiserのidを全て取得して
+    それぞれに対してスクレイピングしてAdを取得し
+    新しいものをDBに保存
+    """
+    def handle(self, *args, **options):
+        advertisers = Advertiser.objects.all()
+        ads = Ad.objects.all()
+        advertiser_ids = [advertiser.id for advertiser in advertisers]
+        ad_ids = [ad.id for ad in ads]
+
+        driver = get_driver()
+        for id_ in advertiser_ids:
+            ad_infos = retrieve_ad_info(driver, id_)
+            print(id_)
+            print(len(ad_infos))
+            for ad_info in ad_infos:
+                if ad_info["id"] not in ad_ids:
+                    self.register(ad_info, id_)
+
+    def register(self, ad_info, advertiser_id):
+        Ad.objects.create(
+             id = ad_info["id"],
+             is_active = True if ad_info["status"] == "Active" else False,
+             start_date = convert_date_format(ad_info["date"]),
+             advertiser = Advertiser.objects.get(id=advertiser_id)
+        )
+
+def convert_date_format(raw_date):
+    month_map = {
+        "Jan": "01",
+        "Feb": "02",
+        "Mar": "03",
+        "Apr": "04",
+        "May": "05",
+        "Jun": "06",
+        "Jul": "07",
+        "Aug": "08",
+        "Sep": "09",
+        "Oct": "10",
+        "Nov": "11",
+        "Dec": "12"
+    }
+    month_day, year = raw_date.split(",")
+    year = year.strip()
+    month, day = month_day.split()
+    date_in_format = f"{year}-{month_map[month]}-{day.zfill(2)}"
+    return date_in_format
 
 
 def get_arguments():
@@ -43,7 +96,7 @@ def retrieve_ad_info(driver, id_):
           "?active_status=all&ad_type=all&country=JP" \
           "&impression_search_field=has_impressions_lifetime&view_all_page_id=" \
           + id_
-    CLASS_NAME_DIV = "_7owt"
+    CLASS_NAME_DIV = "_8k--"
     CLASS_NAME_STATUS = "_7jw1"
     CLASS_NAME_DATE = "_7jwu"
     CLASS_NAME_ID = "_4rhp"
@@ -57,11 +110,10 @@ def retrieve_ad_info(driver, id_):
     for element in elements:
         ad_info = {}
         ad_info["status"] = element.find_element(By.CLASS_NAME, CLASS_NAME_STATUS).text
-        ad_info["date"] = element.find_element(By.CLASS_NAME, CLASS_NAME_DATE).text
+        ad_info["date"] = element.find_element(By.CLASS_NAME, CLASS_NAME_DATE).find_element(By.TAG_NAME, "span").text
         ad_info["id"] = element.find_element(By.CLASS_NAME, CLASS_NAME_ID).text
         ad_infos.append(ad_info)
-    print(ad_infos)
-    print(len(ad_infos))
+    return ad_infos
 
 
 def main():
@@ -70,7 +122,3 @@ def main():
     # retrieve_all = args.retrieve_all
     driver = get_driver()
     retrieve_ad_info(driver, id_)
-
-
-if __name__ == "__main__":
-    main()
