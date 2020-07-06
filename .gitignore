@@ -2,3 +2,4 @@ memo.md
 .devcontainer
 .vscode
 db.sqlite3
+__pycache__
