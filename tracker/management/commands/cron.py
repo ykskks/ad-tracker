@@ -8,56 +8,63 @@ from selenium.webdriver.common.by import By
 from django.core.management.base import BaseCommand
 
 from ...models import Ad, Advertiser
- 
+
+
 class Command(BaseCommand):
     """
     現在登録さてれるAdvertiserのidを全て取得して
     それぞれに対してスクレイピングしてAdを取得し
     新しいものをDBに保存
     """
+    def __init__(self):
+        super().__init__()
+
+        # TODO: 全部取得はデータ増えた時に大丈夫なのか？
+        self.advertisers = Advertiser.objects.all()
+        self.ads = Ad.objects.all()
+        self.advertiser_ids = [advertiser.id for advertiser in self.advertisers]
+        self.ad_ids = [ad.id for ad in self.ads]
+
     def handle(self, *args, **options):
-        advertisers = Advertiser.objects.all()
-        ads = Ad.objects.all()
-        advertiser_ids = [advertiser.id for advertiser in advertisers]
-        ad_ids = [ad.id for ad in ads]
-
         driver = get_driver()
-        for id_ in advertiser_ids:
+        for id_ in self.advertiser_ids:
             ad_infos = retrieve_ad_info(driver, id_)
-            print(id_)
-            print(len(ad_infos))
-            for ad_info in ad_infos:
-                if ad_info["id"] not in ad_ids:
-                    self.register(ad_info, id_)
+            self._check_and_register(id_, ad_infos)
 
-    def register(self, ad_info, advertiser_id):
-        Ad.objects.create(
-             id = ad_info["id"],
-             is_active = True if ad_info["status"] == "Active" else False,
-             start_date = convert_date_format(ad_info["date"]),
-             advertiser = Advertiser.objects.get(id=advertiser_id)
-        )
+    def _check_and_register(self, advertiser_id, ad_infos):
+        """
+        各advertiser_idに対して取得された全てのadについて
+        ad_idが既に登録済みであるか確認し、登録済みでなければDBに登録する
+        """
+        for ad_info in ad_infos:
+            if ad_info["id"] not in self.ad_ids:
+                Ad.objects.create(
+                    id=ad_info["id"],
+                    is_active=True if ad_info["status"] == "Active" else False,
+                    start_date=self._convert_date_format(ad_info["date"]),
+                    advertiser=Advertiser.objects.get(id=advertiser_id)
+                )
 
-def convert_date_format(raw_date):
-    month_map = {
-        "Jan": "01",
-        "Feb": "02",
-        "Mar": "03",
-        "Apr": "04",
-        "May": "05",
-        "Jun": "06",
-        "Jul": "07",
-        "Aug": "08",
-        "Sep": "09",
-        "Oct": "10",
-        "Nov": "11",
-        "Dec": "12"
-    }
-    month_day, year = raw_date.split(",")
-    year = year.strip()
-    month, day = month_day.split()
-    date_in_format = f"{year}-{month_map[month]}-{day.zfill(2)}"
-    return date_in_format
+    def _convert_date_format(self, raw_date):
+        month_map = {
+            "Jan": "01",
+            "Feb": "02",
+            "Mar": "03",
+            "Apr": "04",
+            "May": "05",
+            "Jun": "06",
+            "Jul": "07",
+            "Aug": "08",
+            "Sep": "09",
+            "Oct": "10",
+            "Nov": "11",
+            "Dec": "12"
+        }
+        month_day, year = raw_date.split(",")
+        year = year.strip()
+        month, day = month_day.split()
+        date_in_format = f"{year}-{month_map[month]}-{day.zfill(2)}"
+        return date_in_format
 
 
 def get_arguments():
@@ -71,8 +78,8 @@ def get_arguments():
 def get_driver():
     options = Options()
     options.add_argument('--headless')  # GUIが開かない
-    options.add_argument('--no-sandbox') 
-    options.add_argument('--disable-dev-shm-usage')        
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     # options.language = "JP"
     driver = webdriver.Chrome('/opt/chrome/chromedriver', options=options)
     return driver
@@ -121,4 +128,9 @@ def main():
     id_ = args.id
     # retrieve_all = args.retrieve_all
     driver = get_driver()
-    retrieve_ad_info(driver, id_)
+    ad_infos = retrieve_ad_info(driver, id_)
+    print(f"Retrieved {len(ad_infos)} ad_infos for id {id_}")
+
+
+if __name__ == '__main__':
+    main()
