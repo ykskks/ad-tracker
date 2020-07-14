@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<a href="{% url 'new' %}">Add new advertiser id</a>
+
 {% for ad in object_list %}
 <div class="ad-entry">
     <h2><a href="">{{ ad.id }}</a></h2>
