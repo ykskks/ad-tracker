@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<br>
+{% for ad in object_list %}
+<div class="row">
+	<div class="col s12">
+		<div class="card grey lighten-2">
+			<div class="card-content white-text">
+				<h2><a href="">{{ ad.id }}</a></h2>
+				<p>{{ ad.is_active }}</p>
+				<p>{{ ad.start_date }}</p>
+				<p>{{ ad.advertiser }}</p>
+			</div>
+			<div class="card-action">
+				<a href="#">This is a link</a>
+				<a href="#">This is a link</a>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+{% endblock content %}

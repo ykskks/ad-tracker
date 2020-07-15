@@ -1,15 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<a href="{% url 'new' %}">Add new advertiser id</a>
-
-{% for ad in object_list %}
-<div class="ad-entry">
-    <h2><a href="">{{ ad.id }}</a></h2>
-    <p>{{ ad.is_active }}</p>
-    <p>{{ ad.start_date }}</p>
-    <p>{{ ad.advertiser }}</p>
+<div class="row">
+  <br>
+  <br>
+  <div class="col s12">
+    <div class="card blue-grey darken-1">
+      <div class="card-content white-text">
+        <span class="card-title">Happy ad-tracking!</span>
+        <p>広告主IDを登録すれば、毎日自動で登録された広告主の広告の情報を収集し、保存します。保存された情報はいつでも一覧で確認できます。</p>
+      </div>
+      <div class="card-action">
+        <a href="{% url 'new' %}">新しい広告主IDを追加する</a>
+      </div>
+    </div>
+  </div>
 </div>
-{% endfor %}
+<div class="collection">
+  <a class="collection-item blue-text text-lighten-1" href="{% url 'ad' %}">広告一覧を見る</a>
+  <a class="collection-item blue-text text-lighten-1" href="{% url 'advertiser' %}">広告主一覧を見る</a>
+</div>
+
+<script>
+  const collection = document.querySelector(".collection");
+  collection.addEventListener("mouseover", onMouseover);
+  collection.addEventListener("mouseout", onMouseout);
+
+  function onMouseover(event) {
+    if (event.target.className === "collection-item") {
+      event.target.className = "collection-item active blue-grey darken-1";
+      event.target.children[0].className = "white-text";
+    }
+  }
+
+  function onMouseout(event) {
+    if (event.target.className === "collection-item active blue-grey darken-1") {
+      event.target.className = "collection-item";
+      event.target.children[0].className = "";
+    }
+  }
+</script>
 {% endblock content %}
