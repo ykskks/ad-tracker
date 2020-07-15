@@ -6,16 +6,15 @@
 {% for ad in object_list %}
 <div class="row">
 	<div class="col s12">
-		<div class="card grey lighten-2">
+		<div class="card blue-grey darken-1">
 			<div class="card-content white-text">
-				<h2><a href="">{{ ad.id }}</a></h2>
-				<p>{{ ad.is_active }}</p>
-				<p>{{ ad.start_date }}</p>
-				<p>{{ ad.advertiser }}</p>
+				<h4 class="white-text">{{ ad.id }}</h4>
+				<p class="white-text">{% if ad.is_active %}Active{% else %}Not active{% endif %}</p>
+				<p class="white-text">Started on {{ ad.start_date }}</p>
+				<p class="white-text">Advertiser id: {{ ad.advertiser }}</p>
 			</div>
 			<div class="card-action">
-				<a href="#">This is a link</a>
-				<a href="#">This is a link</a>
+				<a class="amber-text text-darken-1" href="#">詳しく見る</a>
 			</div>
 		</div>
 	</div>

@@ -1,9 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Add new advertiser id</h1>
-<form action="" method="post">{% csrf_token %}
-    {{ form.as_p}}
-    <input type="submit" value="Add">
-</form>
+<br>
+<br>
+<div class="row">
+	<div class="col s12">
+		<div class="card-panel blue-grey darken-1">
+			<span class="white-text">新しい広告主のidを登録できます。
+			</span>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<form class="col s12" action="" method="post">{% csrf_token %}
+		<div class="input-field col s6">
+			{{ form.as_p}}
+			<button class="btn waves-effect waves-light" type="submit" name="action" value="add">登録
+				<i class="material-icons right">send</i>
+			</button>
+		</div>
+	</form>
+</div>
 {% endblock content %}
