@@ -1,6 +1,6 @@
 chromedriver-binary ~=83.0
 selenium
 beautifulsoup4
-django == 3.2.24
+django == 3.2.25
 psycopg2
 psycopg2-binary
